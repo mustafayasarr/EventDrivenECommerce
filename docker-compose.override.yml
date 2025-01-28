@@ -1,0 +1,66 @@
+services:
+  notificationservice.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "5013:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+    restart: always
+    depends_on:
+      - rabbitmq  
+    env_file:
+     - .env
+    networks:
+      - app_network
+
+  orderservice.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "5012:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+    restart: always
+    depends_on:
+      - rabbitmq   
+      - localdb 
+    env_file:
+     - .env
+    networks:
+      - app_network
+    entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
+
+
+  rabbitmq:
+    image: "rabbitmq:management"
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD}"
+    networks:
+      - app_network
+
+  localdb:
+    image: "mcr.microsoft.com/mssql/server:2019-latest"
+    container_name: localdb
+    restart: always
+    environment:
+      SA_PASSWORD: "${DB_PASSWORD}"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
