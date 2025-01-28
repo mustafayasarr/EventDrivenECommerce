@@ -1,4 +1,6 @@
 services:
+
+#NotificationService
   notificationservice.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -16,6 +18,7 @@ services:
     networks:
       - app_network
 
+#OrderService
   orderservice.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -35,7 +38,7 @@ services:
       - app_network
     entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
 
-
+#RabbitMQ
   rabbitmq:
     image: "rabbitmq:management"
     container_name: rabbitmq
@@ -49,6 +52,7 @@ services:
     networks:
       - app_network
 
+#MSSQL LocalDb
   localdb:
     image: "mcr.microsoft.com/mssql/server:2019-latest"
     container_name: localdb
